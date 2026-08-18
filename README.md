@@ -121,11 +121,9 @@ I would rather state this than let you find out.
   node, every `$('Node')` expression names a node that exists, every node with an error
   output has that branch wired, no orphans, and every Code node body parses as
   JavaScript.
-- **Verified by CI, not yet locally.** `db/schema.sql` is applied to a
-  `pgvector/pgvector:pg16` service container on every push — twice, to prove the
-  `if not exists` guards make it idempotent — and `expire_stale_approvals()` is
-  invoked. I had no Postgres available while writing it, so CI is that file's first
-  real execution; check the badge before trusting it.
+- **Verified in CI.** `db/schema.sql` is applied to a `pgvector/pgvector:pg16` service
+  container on every push — twice, which proves the `if not exists` guards make it
+  idempotent — and `expire_stale_approvals()` is executed. Green.
 - **Not verified end-to-end.** The workflows have not been run against live Xero /
   ServiceM8 / Slack tenants. Downstream API shapes (accounting, CRM, mail) are written
   to the documented contract and will need adjusting to your instance.

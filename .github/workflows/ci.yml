@@ -14,8 +14,8 @@ jobs:
     name: Validate n8n workflows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
       # No dependencies — the validator is plain Node, so this stays fast enough
@@ -29,8 +29,8 @@ jobs:
       run:
         working-directory: services/approval-gateway
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: '22'
           cache: npm
@@ -55,7 +55,7 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # Applying the schema for real is the only way to know it parses. Running
       # it twice also proves the `if not exists` guards make it idempotent.
       - name: Apply schema
