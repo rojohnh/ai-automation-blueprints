@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "approval-gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": {
+    "enabled": true
+  },
+  // Non-secret configuration only. Everything in .dev.vars.example that looks
+  // like a credential is set with `wrangler secret put`, never here — this file
+  // is committed.
+  "vars": {
+    "PUBLIC_BASE_URL": "https://approval-gateway.example.workers.dev"
+  }
+}

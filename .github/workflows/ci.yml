@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  workflows:
+    name: Validate n8n workflows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      # No dependencies — the validator is plain Node, so this stays fast enough
+      # to run on every push without anyone learning to ignore it.
+      - run: node workflows/validate.mjs
+
+  service:
+    name: Typecheck and test approval-gateway
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/approval-gateway
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: services/approval-gateway/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  sql:
+    name: Apply schema to Postgres
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        # pgvector image, because db/schema.sql needs the vector extension.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      # Applying the schema for real is the only way to know it parses. Running
+      # it twice also proves the `if not exists` guards make it idempotent.
+      - name: Apply schema
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/schema.sql
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      - name: Re-apply to check idempotency
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f db/schema.sql
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
+      - name: Exercise the expiry sweep
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -c 'select * from expire_stale_approvals();'
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres

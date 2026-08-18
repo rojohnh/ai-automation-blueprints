@@ -1,0 +1,38 @@
+# Copy to .dev.vars for local development. .dev.vars is gitignored.
+#
+# In production every value below is set with:
+#   wrangler secret put <NAME>
+#
+# Nothing here belongs in wrangler.jsonc — that file is committed.
+
+# ── required ─────────────────────────────────────────────────────────────────
+
+# Anthropic API key. Scope it to a workspace with its own spend limit so a
+# runaway loop cannot spend the whole organisation's budget.
+ANTHROPIC_API_KEY=sk-ant-...
+
+# Supabase project URL, e.g. https://abcdefgh.supabase.co
+SUPABASE_URL=https://your-project.supabase.co
+
+# Service-role key. This bypasses row-level security, which is why every query
+# in src/db.ts filters on tenant_id explicitly. See docs/security.md.
+SUPABASE_SERVICE_KEY=eyJ...
+
+# HMAC key for approval tokens. Minimum 32 characters; generate with:
+#   openssl rand -base64 48
+APPROVAL_SIGNING_SECRET=replace-me-with-at-least-32-random-characters
+
+# Shared secret callers present as the x-api-key header.
+GATEWAY_API_KEY=replace-me
+
+# ── optional: downstream systems the tools talk to ───────────────────────────
+# Tools degrade to a clear "not configured in this environment" tool_result when
+# these are absent, so the service still boots without them.
+
+CRM_BASE_URL=https://crm.example.com/api/v1
+CRM_API_KEY=
+MAIL_BASE_URL=https://mail.example.com/api
+MAIL_API_KEY=
+
+# Public origin used to build approval decision links.
+PUBLIC_BASE_URL=http://localhost:8787
